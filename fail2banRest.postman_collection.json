@@ -1,0 +1,495 @@
+{
+	"info": {
+		"_postman_id": "cafa41f7-0b16-4baa-97c4-b822bc0b9e5c",
+		"name": "fail2banRest",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "41893719"
+	},
+	"item": [
+		{
+			"name": "login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"username\": \"\",\r\n  \"password\": \"\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{server_host}}/api/v1/auth/login",
+					"host": [
+						"{{server_host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getStatus",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{api_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{server_host}}/api/v1/status",
+					"host": [
+						"{{server_host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"status"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getJails",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{api_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{server_host}}/api/v1/jails",
+					"host": [
+						"{{server_host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"jails"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getJailDetails",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{api_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{server_host}}/api/v1/jails/:name",
+					"host": [
+						"{{server_host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"jails",
+						":name"
+					],
+					"variable": [
+						{
+							"key": "name",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getJailStatus",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{api_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{server_host}}/api/v1/jails/:name/status",
+					"host": [
+						"{{server_host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"jails",
+						":name",
+						"status"
+					],
+					"variable": [
+						{
+							"key": "name",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "startJail",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{api_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{server_host}}/api/v1/jails/:name/start",
+					"host": [
+						"{{server_host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"jails",
+						":name",
+						"start"
+					],
+					"variable": [
+						{
+							"key": "name",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "stopJail",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{api_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{server_host}}/api/v1/jails/:name/stop",
+					"host": [
+						"{{server_host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"jails",
+						":name",
+						"stop"
+					],
+					"variable": [
+						{
+							"key": "name",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "restartJail",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{api_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{server_host}}/api/v1/jails/:name/restart",
+					"host": [
+						"{{server_host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"jails",
+						":name",
+						"restart"
+					],
+					"variable": [
+						{
+							"key": "name",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "reloadJail",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{api_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{server_host}}/api/v1/jails/:name/reload",
+					"host": [
+						"{{server_host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"jails",
+						":name",
+						"reload"
+					],
+					"variable": [
+						{
+							"key": "name",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getBannedIps",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{api_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{server_host}}/api/v1/jails/:name/banned",
+					"host": [
+						"{{server_host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"jails",
+						":name",
+						"banned"
+					],
+					"variable": [
+						{
+							"key": "name",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "banIpJail",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{api_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"ip\": \"192.168.1.100\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{server_host}}/api/v1/jails/:name/ban",
+					"host": [
+						"{{server_host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"jails",
+						":name",
+						"ban"
+					],
+					"variable": [
+						{
+							"key": "name",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "unbanIpJail",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{api_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"ip\": \"192.168.1.100\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{server_host}}/api/v1/jails/:name/unban",
+					"host": [
+						"{{server_host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"jails",
+						":name",
+						"unban"
+					],
+					"variable": [
+						{
+							"key": "name",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getStats",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{api_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{server_host}}/api/v1/stats",
+					"host": [
+						"{{server_host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"stats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getJailStats",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{api_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{server_host}}/api/v1/jails/:name/stats",
+					"host": [
+						"{{server_host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"jails",
+						":name",
+						"stats"
+					],
+					"variable": [
+						{
+							"key": "name",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "server_host",
+			"value": ""
+		},
+		{
+			"key": "api_token",
+			"value": ""
+		}
+	]
+}

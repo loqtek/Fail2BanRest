@@ -10,19 +10,36 @@ import (
 
 type Client struct {
 	clientPath string
+	useSudo    bool
 }
 
-func NewClient(clientPath string) *Client {
+func NewClient(clientPath string, useSudo bool) *Client {
 	return &Client{
 		clientPath: clientPath,
+		useSudo:    useSudo,
 	}
 }
 
 func (c *Client) executeCommand(args ...string) (string, error) {
-	cmd := exec.Command(c.clientPath, args...)
+	var cmd *exec.Cmd
+	
+	if c.useSudo {
+		// Use sudo to run fail2ban-client
+		cmd = exec.Command("sudo", append([]string{c.clientPath}, args...)...)
+	} else {
+		cmd = exec.Command(c.clientPath, args...)
+	}
+	
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return "", fmt.Errorf("fail2ban-client error: %w, output: %s", err, string(output))
+		outputStr := strings.TrimSpace(string(output))
+		
+		// Provide more helpful error messages for permission issues
+		if strings.Contains(outputStr, "Permission denied") || strings.Contains(outputStr, "you must be root") {
+			return "", fmt.Errorf("permission denied: fail2ban requires root privileges. Either run the server as root, or set 'use_sudo: true' in config and configure passwordless sudo for fail2ban-client. Error: %s", outputStr)
+		}
+		
+		return "", fmt.Errorf("fail2ban-client error: %w, output: %s", err, outputStr)
 	}
 	return strings.TrimSpace(string(output)), nil
 }

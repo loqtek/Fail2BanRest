@@ -18,14 +18,24 @@ Authorization: Bearer <your-jwt-token>
 ### Authentication
 
 #### POST /auth/login
-Get a JWT token for API access.
+Get a JWT token for API access. Requires either an API key or username/password.
 
-**Request Body:**
+**Request Body (API Key):**
 ```json
 {
-  "token": "any-token-value"
+  "api_key": "your-secure-api-key-from-config"
 }
 ```
+
+**Request Body (Username/Password):**
+```json
+{
+  "username": "admin",
+  "password": "your-plain-text-password"
+}
+```
+
+**Note:** The password in the request is plain text, but it's compared against the bcrypt hash stored in the config file.
 
 **Response:**
 ```json
@@ -299,11 +309,18 @@ Common HTTP status codes:
 
 ### Using curl
 
-1. **Get a token:**
+1. **Get a token (with API key):**
 ```bash
 curl -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"token": "my-secret-token"}'
+  -d '{"api_key": "your-secure-api-key-from-config"}'
+```
+
+**Or with username/password:**
+```bash
+curl -X POST http://localhost:8080/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "admin", "password": "yourpassword"}'
 ```
 
 2. **List jails:**

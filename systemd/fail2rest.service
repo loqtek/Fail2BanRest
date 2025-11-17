@@ -1,0 +1,26 @@
+[Unit]
+Description=Fail2Rest V2 - REST API for Fail2ban
+After=network.target fail2ban.service
+Requires=fail2ban.service
+
+[Service]
+Type=simple
+User=fail2rest
+Group=fail2rest
+WorkingDirectory=/opt/fail2rest
+ExecStart=/usr/local/bin/fail2restV2 -config /etc/fail2rest/config.yaml
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/log
+
+[Install]
+WantedBy=multi-user.target
+

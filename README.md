@@ -39,10 +39,78 @@ server:
 auth:
   jwt_secret: "your-secret-key-change-this"
   token_expiry: 24h
+  
+  # API Keys for authentication (generate with: openssl rand -hex 32)
+  api_keys:
+    - "your-secure-api-key-here"
+  
+  # User accounts (passwords must be bcrypt hashed)
+  users:
+    - username: "admin"
+      password: "$2a$10$..."  # Generate with: ./hash-password -password yourpassword
 
 fail2ban:
   client_path: "/usr/bin/fail2ban-client"
 ```
+
+### Setting Up Authentication
+
+**Option 1: API Keys** (Recommended for automation/server-to-server)
+1. Generate a secure API key:
+   ```bash
+   openssl rand -hex 32
+   ```
+2. Add it to `api_keys` in your config file
+
+**Option 2: Username/Password** (For interactive use)
+1. Hash your password:
+   ```bash
+   go build -o hash-password ./cmd/hash-password
+   ./hash-password -password yourpassword
+   ```
+2. Copy the hashed output and add it to `users` in your config file
+
+**Note:** You must configure at least one authentication method (API keys or users) for the server to start.
+
+### Fail2ban Permissions
+
+Fail2ban requires root privileges to access its socket. You have three options:
+
+**Option 1: Run as root** (Simplest, but less secure)
+```bash
+sudo ./fail2restV2
+```
+
+**Option 2: Use sudo** (Recommended for production)
+1. Configure passwordless sudo for fail2ban-client:
+   ```bash
+   sudo visudo
+   ```
+2. Add this line (replace `youruser` with your actual username):
+   ```
+   youruser ALL=(ALL) NOPASSWD: /usr/bin/fail2ban-client
+   ```
+3. Set `use_sudo: true` in your config.yaml:
+   ```yaml
+   fail2ban:
+     client_path: "/usr/bin/fail2ban-client"
+     use_sudo: true
+   ```
+
+**Option 3: Create a dedicated system user** (Most secure)
+1. Create a system user:
+   ```bash
+   sudo useradd -r -s /bin/false fail2rest
+   ```
+2. Configure sudo for this user:
+   ```bash
+   sudo visudo
+   ```
+   Add:
+   ```
+   fail2rest ALL=(ALL) NOPASSWD: /usr/bin/fail2ban-client
+   ```
+3. Run the service as this user (via systemd, supervisor, etc.)
 
 ## Usage
 
@@ -59,7 +127,7 @@ Or with custom config:
 ## API Endpoints
 
 ### Authentication
-- `POST /api/v1/auth/login` - Get JWT token
+- `POST /api/v1/auth/login` - Get JWT token (requires API key or username/password)
 
 ### Status
 - `GET /api/v1/status` - Get Fail2ban service status
@@ -77,6 +145,28 @@ Or with custom config:
 ### Statistics
 - `GET /api/v1/stats` - Get overall statistics
 - `GET /api/v1/jails/:name/stats` - Get statistics for a specific jail
+
+## Troubleshooting
+
+### Permission Denied Error
+
+If you see an error like:
+```
+Permission denied to socket: /var/run/fail2ban/fail2ban.sock, (you must be root)
+```
+
+**Quick Fix:** Enable sudo in your config:
+```yaml
+fail2ban:
+  use_sudo: true
+```
+
+Then configure passwordless sudo (see "Fail2ban Permissions" section above).
+
+**Alternative:** Run the server as root (not recommended for production):
+```bash
+sudo ./fail2restV2
+```
 
 ## Security
 

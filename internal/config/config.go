@@ -28,12 +28,20 @@ type TLSConfig struct {
 }
 
 type AuthConfig struct {
-	JWTSecret   string `yaml:"jwt_secret"`
-	TokenExpiry string `yaml:"token_expiry"`
+	JWTSecret   string        `yaml:"jwt_secret"`
+	TokenExpiry string        `yaml:"token_expiry"`
+	APIKeys     []string      `yaml:"api_keys,omitempty"`
+	Users       []UserAccount `yaml:"users,omitempty"`
+}
+
+type UserAccount struct {
+	Username string `yaml:"username"`
+	Password string `yaml:"password"` // Should be bcrypt hashed
 }
 
 type Fail2banConfig struct {
 	ClientPath string `yaml:"client_path"`
+	UseSudo    bool   `yaml:"use_sudo,omitempty"` // Use sudo to run fail2ban-client
 }
 
 type LoggingConfig struct {
@@ -54,6 +62,7 @@ var defaultConfig = Config{
 	},
 	Fail2ban: Fail2banConfig{
 		ClientPath: "/usr/bin/fail2ban-client",
+		UseSudo:    false,
 	},
 	Logging: LoggingConfig{
 		Level: "info",
@@ -88,6 +97,13 @@ func LoadConfig(path string) (*Config, error) {
 	// Validate
 	if config.Auth.JWTSecret == "" || config.Auth.JWTSecret == "change-this-secret" {
 		return nil, fmt.Errorf("jwt_secret must be set in config")
+	}
+
+	// Validate that at least one auth method is configured
+	hasAPIKeys := len(config.Auth.APIKeys) > 0
+	hasUsers := len(config.Auth.Users) > 0
+	if !hasAPIKeys && !hasUsers {
+		return nil, fmt.Errorf("at least one authentication method must be configured (api_keys or users)")
 	}
 
 	return &config, nil

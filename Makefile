@@ -3,6 +3,7 @@
 build:
 	@echo "Building fail2restV2..."
 	@go build -o fail2restV2 ./cmd/server
+	@go build -o hash-password ./cmd/hash-password
 	@echo "Build complete!"
 
 run: build

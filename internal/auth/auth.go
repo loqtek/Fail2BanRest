@@ -8,17 +8,35 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthService struct {
 	jwtSecret   []byte
 	tokenExpiry time.Duration
+	apiKeys     map[string]bool
+	users       map[string]string // username -> bcrypt hashed password
 }
 
-func NewAuthService(jwtSecret string, tokenExpiry time.Duration) *AuthService {
+type AuthConfig struct {
+	APIKeys []string
+	Users   map[string]string // username -> bcrypt hashed password
+}
+
+func NewAuthService(jwtSecret string, tokenExpiry time.Duration, authConfig AuthConfig) *AuthService {
+	// Build API key map for fast lookup
+	apiKeyMap := make(map[string]bool)
+	for _, key := range authConfig.APIKeys {
+		if key != "" {
+			apiKeyMap[key] = true
+		}
+	}
+
 	return &AuthService{
 		jwtSecret:   []byte(jwtSecret),
 		tokenExpiry: tokenExpiry,
+		apiKeys:     apiKeyMap,
+		users:       authConfig.Users,
 	}
 }
 
@@ -66,6 +84,27 @@ func (a *AuthService) ValidateToken(tokenString string) (*Claims, error) {
 	return claims, nil
 }
 
+// ValidateAPIKey checks if the provided API key is valid
+func (a *AuthService) ValidateAPIKey(apiKey string) bool {
+	return a.apiKeys[apiKey]
+}
+
+// ValidateCredentials checks if username and password are valid
+func (a *AuthService) ValidateCredentials(username, password string) bool {
+	hashedPassword, exists := a.users[username]
+	if !exists {
+		return false
+	}
+
+	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+	return err == nil
+}
+
+// HasAuthConfigured returns true if any authentication method is configured
+func (a *AuthService) HasAuthConfigured() bool {
+	return len(a.apiKeys) > 0 || len(a.users) > 0
+}
+
 func (a *AuthService) Middleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
@@ -111,4 +150,3 @@ func (a *AuthService) Middleware() gin.HandlerFunc {
 		c.Next()
 	}
 }
-

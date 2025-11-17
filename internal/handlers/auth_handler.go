@@ -3,9 +3,9 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/fail2rest/v2/internal/auth"
 	"github.com/fail2rest/v2/internal/models"
+	"github.com/gin-gonic/gin"
 )
 
 type AuthHandler struct {
@@ -19,13 +19,59 @@ func NewAuthHandler(authService *auth.AuthService) *AuthHandler {
 }
 
 // Login handles authentication and returns a JWT token
-// For simplicity, we accept any token in the request (you can enhance this with proper validation)
+// Supports API key or username/password authentication
 func (h *AuthHandler) Login(c *gin.Context) {
 	var req models.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, models.APIResponse{
 			Success: false,
 			Error:   "Invalid request: " + err.Error(),
+		})
+		return
+	}
+
+	// Check if authentication is configured
+	if !h.authService.HasAuthConfigured() {
+		c.JSON(http.StatusInternalServerError, models.APIResponse{
+			Success: false,
+			Error:   "Authentication not configured. Please configure API keys or users in config file.",
+		})
+		return
+	}
+
+	// Validate credentials - try API key first, then username/password
+	authenticated := false
+
+	if req.APIKey != "" {
+		authenticated = h.authService.ValidateAPIKey(req.APIKey)
+		if !authenticated {
+			c.JSON(http.StatusUnauthorized, models.APIResponse{
+				Success: false,
+				Error:   "Invalid API key",
+			})
+			return
+		}
+	} else if req.Username != "" && req.Password != "" {
+		authenticated = h.authService.ValidateCredentials(req.Username, req.Password)
+		if !authenticated {
+			c.JSON(http.StatusUnauthorized, models.APIResponse{
+				Success: false,
+				Error:   "Invalid username or password",
+			})
+			return
+		}
+	} else {
+		c.JSON(http.StatusBadRequest, models.APIResponse{
+			Success: false,
+			Error:   "Either 'api_key' or 'username' and 'password' must be provided",
+		})
+		return
+	}
+
+	if !authenticated {
+		c.JSON(http.StatusUnauthorized, models.APIResponse{
+			Success: false,
+			Error:   "Authentication failed",
 		})
 		return
 	}
@@ -48,4 +94,3 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		},
 	})
 }
-

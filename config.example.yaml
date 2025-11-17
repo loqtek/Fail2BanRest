@@ -9,9 +9,26 @@ server:
 auth:
   jwt_secret: "change-this-to-a-secure-random-string"
   token_expiry: "24h"
+  
+  # API Keys for authentication (use for server-to-server or automation)
+  # Generate secure random keys (e.g., openssl rand -hex 32)
+  api_keys:
+    - "your-secure-api-key-here-change-this"
+    # - "another-api-key-if-needed"
+  
+  # User accounts for username/password authentication
+  # Passwords must be bcrypt hashed (use cmd/hash-password tool)
+  users:
+    - username: "admin"
+      password: "$2a$10$PZngoLZqPXGqGHKMXcYZKeBYQ/uMum4sBdSDt42wrOV2Az.JIdaZ2"  # Use hash-password tool to generate
+    # - username: "user2"
+    #   password: "$2a$10$AnotherBcryptHashedPassword"
 
 fail2ban:
   client_path: "/usr/bin/fail2ban-client"
+  # Set to true if you want to use sudo to run fail2ban-client
+  # Requires passwordless sudo for fail2ban-client (see README for setup)
+  use_sudo: false
 
 logging:
   level: "info" # debug, info, warn, error

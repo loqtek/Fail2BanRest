@@ -11,8 +11,14 @@ type APIResponse struct {
 }
 
 // LoginRequest represents a login request
+// Supports either API key or username/password authentication
 type LoginRequest struct {
-	Token string `json:"token" binding:"required"`
+	// API Key authentication
+	APIKey string `json:"api_key,omitempty"`
+
+	// Username/Password authentication
+	Username string `json:"username,omitempty"`
+	Password string `json:"password,omitempty"`
 }
 
 // LoginResponse represents a login response

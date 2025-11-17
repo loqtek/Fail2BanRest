@@ -1,35 +1,64 @@
-# Binaries
+# Binaries for programs and plugins
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
 fail2restV2
+hash-password
 
-# Test binary
+# Test binary, built with `go test -c`
 *.test
 
 # Output of the go coverage tool
 *.out
+coverage.txt
+coverage.html
 
 # Dependency directories
 vendor/
 
 # Go workspace file
 go.work
+go.work.sum
 
-# IDE
+# IDE and editor files
 .idea/
 .vscode/
 *.swp
 *.swo
-*~
+*.sublime-project
+*.sublime-workspace
 
-# Config files with secrets
+# Config files with secrets (keep example files)
 config.yaml
+config.yml
 config.json
 .env
+.env.local
+*.local.yaml
+*.local.yml
 
 # Logs
 *.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Build artifacts
+dist/
+build/
+bin/
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Backup files
+*.bak
+*.backup
+*~
 
