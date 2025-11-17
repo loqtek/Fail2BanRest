@@ -5,7 +5,7 @@
 *.so
 *.dylib
 fail2restV2
-hash-password
+/hash-password
 
 # Test binary, built with `go test -c`
 *.test
