@@ -1,0 +1,18 @@
+server:
+  host: "0.0.0.0"
+  port: 8080
+  tls:
+    enabled: false
+    cert_file: ""
+    key_file: ""
+
+auth:
+  jwt_secret: "change-this-to-a-secure-random-string"
+  token_expiry: "24h"
+
+fail2ban:
+  client_path: "/usr/bin/fail2ban-client"
+
+logging:
+  level: "info" # debug, info, warn, error
+
