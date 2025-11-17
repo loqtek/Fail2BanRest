@@ -1,0 +1,32 @@
+version: '3.8'
+
+# Production docker-compose configuration
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+services:
+  fail2rest:
+    # Override for production settings
+    restart: always
+    ports:
+      # Only bind to localhost in production (use reverse proxy)
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - /var/run/fail2ban/fail2ban.sock:/var/run/fail2ban/fail2ban.sock:ro
+      - /etc/fail2rest/config.yaml:/etc/fail2rest/config.yaml:ro
+      # Mount TLS certificates if using HTTPS
+      # - /etc/ssl/certs/fail2rest:/etc/ssl/certs/fail2rest:ro
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+

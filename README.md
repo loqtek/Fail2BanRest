@@ -13,6 +13,22 @@ A simple, light, secure REST API for managing and monitoring Fail2ban servers, w
 
 ## Installation
 
+### Option 1: Docker (Recommended)
+
+See [DOCKER.md](DOCKER.md) for detailed Docker setup instructions.
+
+Quick start:
+```bash
+# Create config
+cp config.example.yaml config.yaml
+# Edit config.yaml
+
+# Start with Docker Compose
+docker-compose up -d
+```
+
+### Option 2: Native Installation
+
 1. Clone the repository
 2. Install dependencies:
    ```bash
@@ -20,7 +36,8 @@ A simple, light, secure REST API for managing and monitoring Fail2ban servers, w
    ```
 3. Build the application:
    ```bash
-   go build -o fail2restV2
+   go build -o fail2restV2 ./cmd/server
+   go build -o hash-password ./cmd/hash-password
    ```
 
 ## Configuration

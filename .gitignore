@@ -62,3 +62,7 @@ Thumbs.db
 *.backup
 *~
 
+# Docker
+.docker/
+docker-compose.override.yml
+

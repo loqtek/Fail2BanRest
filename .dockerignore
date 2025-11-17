@@ -1,0 +1,46 @@
+# Git
+.git
+.gitignore
+
+# Binaries (will be built in container)
+fail2restV2
+hash-password
+
+# Documentation (optional - can include if you want)
+# README.md
+# API.md
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Config files with secrets
+config.yaml
+config.yml
+*.local.yaml
+.env
+
+# Logs
+*.log
+logs/
+
+# Test files
+*_test.go
+
+# Build artifacts
+dist/
+build/
+bin/
+vendor/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
