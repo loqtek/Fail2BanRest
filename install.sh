@@ -2,6 +2,7 @@
 # Fail2Rest V2 Installation Script
 # Usage: curl -fsSL https://raw.githubusercontent.com/loqtek/Fail2BanRest/main/install.sh | sudo bash
 # Uninstall: curl -fsSL https://raw.githubusercontent.com/loqtek/Fail2BanRest/main/install.sh | sudo bash -s uninstall
+# Uninstall (with config): curl -fsSL https://raw.githubusercontent.com/loqtek/Fail2BanRest/main/install.sh | sudo bash -s uninstall --remove-config
 
 set -euo pipefail
 
@@ -210,6 +211,7 @@ setup_systemd() {
     fi
     
     # Create service file
+    # Note: Running as root is required for fail2ban socket access
     cat > "$SERVICE_FILE" <<EOF
 [Unit]
 Description=Fail2Rest V2 - REST API for Fail2ban
@@ -238,6 +240,8 @@ ReadWritePaths=/var/log
 WantedBy=multi-user.target
 EOF
     
+    log_info "Service configured to run as root (required for fail2ban access)"
+    
     # Reload systemd
     systemctl daemon-reload
     
@@ -250,31 +254,25 @@ EOF
 setup_sudo() {
     log_info "Checking fail2ban permissions..."
     
-    # Test if we can access fail2ban
-    if sudo -u nobody fail2ban-client status &>/dev/null; then
-        log_success "fail2ban is accessible"
+    # Test if fail2ban is accessible
+    if fail2ban-client status &>/dev/null; then
+        log_success "fail2ban is accessible (service runs as root)"
         return
     fi
     
-    log_warning "fail2ban requires root or sudo access"
-    read -p "Configure passwordless sudo for fail2ban-client? (y/n): " -r
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        local sudoers_line="root ALL=(ALL) NOPASSWD: $(which fail2ban-client)"
-        
-        # Check if already configured
-        if grep -q "NOPASSWD.*fail2ban-client" /etc/sudoers 2>/dev/null; then
-            log_info "Sudo already configured"
-            return
-        fi
-        
-        # Add to sudoers
-        echo "$sudoers_line" >> /etc/sudoers.d/fail2rest
-        chmod 440 /etc/sudoers.d/fail2rest
-        
-        log_success "Sudo configured"
-    else
-        log_warning "You may need to run the service as root or configure sudo manually"
+    # Since the service runs as root, it should have access
+    # But let's verify the socket exists
+    if [[ -S /var/run/fail2ban/fail2ban.sock ]]; then
+        log_success "fail2ban socket found (service will run as root)"
+        return
     fi
+    
+    log_warning "fail2ban socket not found - make sure fail2ban is running"
+    log_info "The service is configured to run as root, which allows access to fail2ban"
+    log_info "If you prefer non-root, you can:"
+    log_info "  1. Edit $SERVICE_FILE and change User/Group"
+    log_info "  2. Configure sudo access for fail2ban-client"
+    log_info "  3. Set use_sudo: true in $CONFIG_DIR/config.yaml"
 }
 
 start_service() {
@@ -301,10 +299,20 @@ start_service() {
 
 uninstall() {
     log_warning "This will remove Fail2Rest V2 and all its files"
-    read -p "Are you sure? (yes/no): " -r
-    if [[ ! $REPLY == "yes" ]]; then
-        log_info "Uninstall cancelled"
-        exit 0
+    
+    # Check if running non-interactively (piped input)
+    if [[ ! -t 0 ]]; then
+        # Non-interactive mode - proceed with uninstall
+        log_info "Running in non-interactive mode - proceeding with uninstall"
+    else
+        # Interactive mode - ask for confirmation
+        echo ""
+        log_warning "Type 'yes' to confirm uninstall, or anything else to cancel:"
+        read -r
+        if [[ ! $REPLY == "yes" ]]; then
+            log_info "Uninstall cancelled"
+            exit 0
+        fi
     fi
     
     log_info "Stopping service..."
@@ -318,12 +326,26 @@ uninstall() {
     log_info "Removing sudoers entry..."
     rm -f /etc/sudoers.d/fail2rest
     
-    log_info "Removing files..."
+    log_info "Removing application files..."
     rm -rf "$INSTALL_DIR"
     
-    read -p "Remove configuration file? (y/n): " -r
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        rm -rf "$CONFIG_DIR"
+    # In non-interactive mode, keep config by default (safer)
+    # In interactive mode, ask
+    if [[ -t 0 ]]; then
+        read -p "Remove configuration file? (y/n): " -r
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            log_info "Removing configuration..."
+            rm -rf "$CONFIG_DIR"
+        else
+            log_info "Keeping configuration at $CONFIG_DIR"
+        fi
+    else
+        log_info "Keeping configuration at $CONFIG_DIR (use --remove-config to delete)"
+        # Check for --remove-config flag
+        if [[ "${*}" == *"--remove-config"* ]]; then
+            log_info "Removing configuration..."
+            rm -rf "$CONFIG_DIR"
+        fi
     fi
     
     log_success "Uninstall complete"
@@ -352,7 +374,7 @@ main() {
     # Check for uninstall flag
     if [[ "${1:-}" == "uninstall" ]]; then
         check_root
-        uninstall
+        uninstall "$@"
         exit 0
     fi
     
