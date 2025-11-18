@@ -82,23 +82,43 @@ check_fail2ban() {
     
     if ! command -v fail2ban-client &> /dev/null; then
         log_warning "fail2ban-client not found"
-        read -p "Install fail2ban? (y/n): " -r
-        if [[ $REPLY =~ ^[Yy]$ ]]; then
-            apt-get update
-            apt-get install -y fail2ban
+        if [[ -t 0 ]] && [[ -t 1 ]]; then
+            # Interactive mode
+            read -p "Install fail2ban? (y/n): " -r </dev/tty
+            if [[ $REPLY =~ ^[Yy]$ ]]; then
+                apt-get update
+                apt-get install -y fail2ban
+            else
+                log_error "fail2ban is required. Exiting."
+                exit 1
+            fi
         else
-            log_error "fail2ban is required. Exiting."
-            exit 1
+            # Non-interactive mode - try to install automatically
+            log_info "Attempting to install fail2ban automatically..."
+            apt-get update
+            apt-get install -y fail2ban || {
+                log_error "Failed to install fail2ban automatically"
+                log_error "Please install fail2ban manually: sudo apt-get install fail2ban"
+                exit 1
+            }
         fi
     fi
     
     # Check if fail2ban is running
     if ! systemctl is-active --quiet fail2ban 2>/dev/null; then
         log_warning "fail2ban service is not running"
-        read -p "Start fail2ban service? (y/n): " -r
-        if [[ $REPLY =~ ^[Yy]$ ]]; then
-            systemctl start fail2ban
-            systemctl enable fail2ban
+        if [[ -t 0 ]] && [[ -t 1 ]]; then
+            # Interactive mode
+            read -p "Start fail2ban service? (y/n): " -r </dev/tty
+            if [[ $REPLY =~ ^[Yy]$ ]]; then
+                systemctl start fail2ban
+                systemctl enable fail2ban
+            fi
+        else
+            # Non-interactive mode - try to start automatically
+            log_info "Attempting to start fail2ban service..."
+            systemctl start fail2ban 2>/dev/null || true
+            systemctl enable fail2ban 2>/dev/null || true
         fi
     fi
     
@@ -166,9 +186,16 @@ setup_config() {
     
     if [[ -f "$config_file" ]]; then
         log_warning "Configuration file already exists at $config_file"
-        read -p "Overwrite? (y/n): " -r
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-            log_info "Keeping existing configuration"
+        if [[ -t 0 ]] && [[ -t 1 ]]; then
+            # Interactive mode
+            read -p "Overwrite? (y/n): " -r </dev/tty
+            if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                log_info "Keeping existing configuration"
+                return
+            fi
+        else
+            # Non-interactive mode - keep existing config (safer)
+            log_info "Keeping existing configuration (non-interactive mode)"
             return
         fi
     fi
@@ -202,10 +229,16 @@ setup_systemd() {
     # Check if service already exists
     if systemctl list-unit-files | grep -q "^${SERVICE_NAME}.service"; then
         log_warning "Service already exists"
-        read -p "Reinstall service? (y/n): " -r
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-            log_info "Keeping existing service"
-            return
+        if [[ -t 0 ]] && [[ -t 1 ]]; then
+            # Interactive mode
+            read -p "Reinstall service? (y/n): " -r </dev/tty
+            if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                log_info "Keeping existing service"
+                return
+            fi
+        else
+            # Non-interactive mode - reinstall service
+            log_info "Reinstalling service (non-interactive mode)"
         fi
         systemctl stop "$SERVICE_NAME" 2>/dev/null || true
     fi
@@ -300,16 +333,14 @@ start_service() {
 uninstall() {
     log_warning "This will remove Fail2Rest V2 and all its files"
     
-    # Check if running non-interactively (piped input)
-    if [[ ! -t 0 ]]; then
-        # Non-interactive mode - proceed with uninstall
+    if [[ ! -t 0 ]] || [[ "${CI:-}" == "true" ]] || [[ "${NONINTERACTIVE:-}" == "true" ]]; then
         log_info "Running in non-interactive mode - proceeding with uninstall"
     else
         # Interactive mode - ask for confirmation
         echo ""
         log_warning "Type 'yes' to confirm uninstall, or anything else to cancel:"
-        read -r
-        if [[ ! $REPLY == "yes" ]]; then
+        read -r REPLY </dev/tty || REPLY=""
+        if [[ ! "$REPLY" == "yes" ]]; then
             log_info "Uninstall cancelled"
             exit 0
         fi
@@ -331,8 +362,9 @@ uninstall() {
     
     # In non-interactive mode, keep config by default (safer)
     # In interactive mode, ask
-    if [[ -t 0 ]]; then
-        read -p "Remove configuration file? (y/n): " -r
+    if [[ -t 0 ]] && [[ -t 1 ]]; then
+        # Interactive mode
+        read -p "Remove configuration file? (y/n): " -r </dev/tty
         if [[ $REPLY =~ ^[Yy]$ ]]; then
             log_info "Removing configuration..."
             rm -rf "$CONFIG_DIR"
@@ -340,6 +372,7 @@ uninstall() {
             log_info "Keeping configuration at $CONFIG_DIR"
         fi
     else
+        # Non-interactive mode
         log_info "Keeping configuration at $CONFIG_DIR (use --remove-config to delete)"
         # Check for --remove-config flag
         if [[ "${*}" == *"--remove-config"* ]]; then
@@ -392,13 +425,22 @@ main() {
     setup_systemd
     setup_sudo
     
-    # Ask to start service
-    read -p "Start service now? (y/n): " -r
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        start_service
+    # Ask to start service (only if interactive)
+    if [[ -t 0 ]] && [[ -t 1 ]]; then
+        # Interactive mode
+        read -p "Start service now? (y/n): " -r </dev/tty
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            start_service
+        else
+            log_info "Service installed but not started"
+            log_info "Start it with: systemctl start $SERVICE_NAME"
+        fi
     else
-        log_info "Service installed but not started"
-        log_info "Start it with: systemctl start $SERVICE_NAME"
+        # Non-interactive mode - don't start automatically
+        # User should configure auth first, then start manually
+        log_info "Service installed but not started (non-interactive mode)"
+        log_info "After configuring authentication in $CONFIG_DIR/config.yaml, start it with:"
+        log_info "  sudo systemctl start $SERVICE_NAME"
     fi
     
     echo ""
