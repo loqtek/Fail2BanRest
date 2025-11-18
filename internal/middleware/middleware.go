@@ -49,10 +49,10 @@ func SecurityHeaders() gin.HandlerFunc {
 func RateLimiter(rate string) gin.HandlerFunc {
 	store := memory.NewStore()
 	
-	// Default rate: 60 requests per minute
+	// Default rate: 80 requests per minute
 	defaultRate := limiter.Rate{
 		Period: 1 * time.Minute,
-		Limit:  60,
+		Limit:  80,
 	}
 	
 	// Parse custom rate if provided

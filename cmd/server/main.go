@@ -94,7 +94,7 @@ func main() {
 
 		c.JSON(200, gin.H{
 			"status":  status,
-			"service": "fail2rest-v2",
+			"service": "fail2ban-rest",
 			"time":    time.Now().Unix(),
 		})
 	})

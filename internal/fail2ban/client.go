@@ -34,7 +34,6 @@ func (c *Client) executeCommand(args ...string) (string, error) {
 	if err != nil {
 		outputStr := strings.TrimSpace(string(output))
 		
-		// Provide more helpful error messages for permission issues
 		if strings.Contains(outputStr, "Permission denied") || strings.Contains(outputStr, "you must be root") {
 			return "", fmt.Errorf("permission denied: fail2ban requires root privileges. Either run the server as root, or set 'use_sudo: true' in config and configure passwordless sudo for fail2ban-client. Error: %s", outputStr)
 		}
