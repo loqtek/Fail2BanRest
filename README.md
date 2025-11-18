@@ -13,7 +13,29 @@ A simple, light, secure REST API for managing and monitoring Fail2ban servers, w
 
 ## Installation
 
-### Option 1: Docker (Recommended)
+### Option 1: Automated Install Script (Recommended)
+
+Install with a single command:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/loqtek/Fail2BanRest/main/install.sh | bash
+```
+
+This will:
+- Install all dependencies
+- Build the application
+- Set up systemd service
+- Create configuration file
+- Start the service
+
+See [INSTALL.md](INSTALL.md) for detailed installation instructions.
+
+**Uninstall:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/loqtek/Fail2BanRest/main/install.sh | bash -s uninstall
+```
+
+### Option 2: Docker
 
 See [DOCKER.md](DOCKER.md) for detailed Docker setup instructions.
 
@@ -27,7 +49,7 @@ cp config.example.yaml config.yaml
 docker-compose up -d
 ```
 
-### Option 2: Native Installation
+### Option 3: Manual Installation
 
 1. Clone the repository
 2. Install dependencies:
