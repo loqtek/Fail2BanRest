@@ -15,10 +15,10 @@ A simple, light, secure REST API for managing and monitoring Fail2ban servers, w
 
 ### Option 1: Automated Install Script (Recommended)
 
-Install with a single command:
+Install with a single command (requires sudo):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/loqtek/Fail2BanRest/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/loqtek/Fail2BanRest/main/install.sh | sudo bash
 ```
 
 This will:
@@ -32,7 +32,7 @@ See [INSTALL.md](INSTALL.md) for detailed installation instructions.
 
 **Uninstall:**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/loqtek/Fail2BanRest/main/install.sh | bash -s uninstall
+curl -fsSL https://raw.githubusercontent.com/loqtek/Fail2BanRest/main/install.sh | sudo bash -s uninstall
 ```
 
 ### Option 2: Docker

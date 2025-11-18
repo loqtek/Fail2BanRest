@@ -1,7 +1,7 @@
 #!/bin/bash
 # Fail2Rest V2 Installation Script
-# Usage: curl -fsSL https://raw.githubusercontent.com/loqtek/Fail2BanRest/main/install.sh | bash
-# Uninstall: curl -fsSL https://raw.githubusercontent.com/loqtek/Fail2BanRest/main/install.sh | bash -s uninstall
+# Usage: curl -fsSL https://raw.githubusercontent.com/loqtek/Fail2BanRest/main/install.sh | sudo bash
+# Uninstall: curl -fsSL https://raw.githubusercontent.com/loqtek/Fail2BanRest/main/install.sh | sudo bash -s uninstall
 
 set -euo pipefail
 
@@ -42,6 +42,10 @@ log_error() {
 check_root() {
     if [[ $EUID -ne 0 ]]; then
         log_error "This script must be run as root (use sudo)"
+        echo ""
+        log_info "Please run:"
+        echo "  curl -fsSL https://raw.githubusercontent.com/loqtek/Fail2BanRest/main/install.sh | sudo bash"
+        echo ""
         exit 1
     fi
 }
